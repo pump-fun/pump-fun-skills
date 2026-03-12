@@ -43,10 +43,10 @@ Create a `.env` (or `.env.local` for Next.js) file with the following:
 
 ```env
 # Solana RPC — server-side (used to build transactions and verify payments)
-SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+SOLANA_RPC_URL=https://rpc.solanatracker.io/public
 
 # Solana RPC — client-side (used by wallet adapter in the browser)
-NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+NEXT_PUBLIC_SOLANA_RPC_URL=https://rpc.solanatracker.io/public
 
 # The token mint address of your tokenized agent on pump.fun
 AGENT_TOKEN_MINT_ADDRESS=<your-agent-mint-address>
@@ -56,6 +56,10 @@ AGENT_TOKEN_MINT_ADDRESS=<your-agent-mint-address>
 # SOL (wrapped): So11111111111111111111111111111111111111112
 CURRENCY_MINT=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 ```
+
+**RPC for mainnet-beta:** The default Solana public RPC (`https://api.mainnet-beta.solana.com`) does **not** support sending transactions. If the user has not provided their own RPC URL, use one of these free mainnet-beta endpoints that support `sendTransaction`:
+- **Solana Tracker** — `https://rpc.solanatracker.io/public`
+- **Ankr** — `https://rpc.ankr.com/solana`
 
 Read these values from `process.env` at runtime. Never hard-code mint addresses or RPC URLs.
 
