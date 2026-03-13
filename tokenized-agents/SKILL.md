@@ -67,7 +67,7 @@ Read these values from `process.env` at runtime. Never hard-code mint addresses 
 ## Install
 
 ```bash
-npm install @pump-fun/agent-payments-sdk@1.0.19 @solana/web3.js@^1.98.0
+npm install @pump-fun/agent-payments-sdk@2.0.0 @solana/web3.js@^1.98.0
 ```
 
 ### Dependency Compatibility — IMPORTANT
