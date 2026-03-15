@@ -9,7 +9,7 @@ metadata:
 
 ## Before Starting Work
 
-Before writing or modifying any code, must ask the user for anything that is unclear:
+**MANDATORY — Do NOT write or modify any code until every item below is answered by the user:**
 
 - [ ] Agent token mint address (from pump.fun)
 - [ ] Payment currency decided (USDC or SOL)
@@ -17,7 +17,7 @@ Before writing or modifying any code, must ask the user for anything that is unc
 - [ ] RPC URL provided or a fallback agreed upon
 - [ ] Framework confirmed (Next.js, Express, other)
 
-If any item is unchecked, ask the user before proceeding.
+You MUST ask the user for ALL unchecked items in your very first response. Do not assume defaults. Do not proceed until the user has explicitly answered each one.
 
 ## Safety Rules
 
@@ -60,10 +60,12 @@ AGENT_TOKEN_MINT_ADDRESS=<your-agent-mint-address>
 CURRENCY_MINT=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 ```
 
-**RPC for mainnet-beta:** The default Solana public RPC (`https://api.mainnet-beta.solana.com`) does **not** support sending transactions. Ask the user for an RPC provider, If the user has not provided their own RPC URL, use one of these free mainnet-beta endpoints that support `sendTransaction`:
+**RPC for mainnet-beta:** The default Solana public RPC (`https://api.mainnet-beta.solana.com`) does **not** support sending transactions. You MUST ask the user which RPC endpoint to use. Present these free mainnet-beta options if the user does not have their own:
 
 - **Solana Tracker** — `https://rpc.solanatracker.io/public`
 - **Ankr** — `https://rpc.ankr.com/solana`
+
+Do NOT silently pick one — wait for the user to confirm before proceeding.
 
 Read these values from `process.env` at runtime. Never hard-code mint addresses or RPC URLs.
 
