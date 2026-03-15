@@ -30,6 +30,11 @@ Do not assume these values. If any are missing, ask the user before proceeding.
 - Always ensure `endTime > startTime` and both are valid Unix timestamps.
 - Use the correct decimal precision for the currency (6 decimals for USDC, 9 for SOL).
 - **Always verify payments on the server** using `validateInvoicePayment` before delivering any service. Never trust the client alone — clients can be spoofed.
+- **Always verify your code against this skill before finalizing.** Before delivering generated code, re-read the relevant sections of this document and confirm:
+  - Parameter types match the documented signatures — `buildAcceptPaymentInstructions` accepts `number` for numeric fields, `validateInvoicePayment` accepts `number`, and `getInvoiceIdPDA` accepts `number`.
+  - Parameter ordering and names match exactly.
+  - Default values (e.g. `computeUnitLimit` defaults to `100_000`) are not contradicted.
+  - Import paths use `@pump-fun/agent-payments-sdk`, not internal module paths.
 
 ## Supported Currencies
 
@@ -68,7 +73,7 @@ Read these values from `process.env` at runtime. Never hard-code mint addresses 
 ## Install
 
 ```bash
-npm install @pump-fun/agent-payments-sdk@3.0.0 @solana/web3.js@^1.98.0
+npm install @pump-fun/agent-payments-sdk@3.0.2 @solana/web3.js@^1.98.0
 ```
 
 ### Dependency Compatibility — IMPORTANT
@@ -158,7 +163,7 @@ const ixs = await agent.buildAcceptPaymentInstructions({
 
 The returned `TransactionInstruction[]` always starts with compute budget instructions, followed by the payment instructions:
 
-- **`SetComputeUnitLimit`** is always prepended (default `92_849` CU). Override via `computeUnitLimit` if your transactions fail with "compute exceeded".
+- **`SetComputeUnitLimit`** is always prepended (default `100_000` CU). Override via `computeUnitLimit` if your transactions fail with "compute exceeded".
 - **`SetComputeUnitPrice`** is prepended only when `computeUnitPrice` is provided. Use this to set a priority fee for faster landing during congestion.
 
 After the compute budget prefix:
@@ -178,6 +183,81 @@ You do not need to handle SOL wrapping or compute budget yourself — `buildAcce
 - The `amount`, `memo`, `startTime`, and `endTime` must exactly match when verifying later.
 - Each unique combination of `(mint, currencyMint, amount, memo, startTime, endTime)` can only be paid once — the on-chain Invoice ID PDA prevents duplicate payments.
 - Generate a unique `memo` for each invoice (e.g. `Math.floor(Math.random() * 900000000000) + 100000`).
+
+## Deriving the Invoice ID
+
+The Invoice ID is a PDA (`PublicKey`) that uniquely identifies an invoice on-chain. It is derived deterministically from the six invoice parameters. Both `buildAcceptPaymentInstructions` and `validateInvoicePayment` derive it internally, but you can also compute it yourself.
+
+### Import
+
+```typescript
+import { getInvoiceIdPDA } from "@pump-fun/agent-payments-sdk";
+import { PublicKey } from "@solana/web3.js";
+```
+
+### Usage
+
+`getInvoiceIdPDA` returns `[PublicKey, number]`. The first element is the Invoice ID; the second is the PDA bump seed.
+
+```typescript
+const tokenMint = new PublicKey(process.env.AGENT_TOKEN_MINT_ADDRESS!);
+const currencyMint = new PublicKey(process.env.CURRENCY_MINT!);
+
+const amount = 1000000;
+const memo = 123456789;
+const startTime = 1700000000;
+const endTime = 1700086400;
+
+const [invoiceId] = getInvoiceIdPDA(
+  tokenMint,
+  currencyMint,
+  amount,
+  memo,
+  startTime,
+  endTime,
+);
+
+console.log("Invoice ID:", invoiceId.toBase58());
+```
+
+All numeric parameters (`amount`, `memo`, `startTime`, `endTime`) are plain `number` values. BN conversion is handled internally.
+
+### PDA Seeds
+
+The Invoice ID is derived with program `AgenTMiC2hvxGebTsgmsD4HHBa8WEcqGFf87iwRRxLo7` using these seeds:
+
+| Seed index | Value                                |
+| ---------- | ------------------------------------ |
+| 0          | `"invoice-id"` (UTF-8 bytes)         |
+| 1          | `tokenMint` (32 bytes)               |
+| 2          | `currencyMint` (32 bytes)            |
+| 3          | `amount` (8 bytes, little-endian)    |
+| 4          | `memo` (8 bytes, little-endian)      |
+| 5          | `startTime` (8 bytes, little-endian) |
+| 6          | `endTime` (8 bytes, little-endian)   |
+
+Because the PDA is deterministic, the same six parameters always produce the same Invoice ID. The on-chain program uses this to reject duplicate payments — once an Invoice ID PDA is created, the same combination cannot be paid again.
+
+### When to Use
+
+- **Pre-check for duplicates** — before building a payment transaction, check if the Invoice ID account already exists on-chain to avoid submitting a transaction that will fail:
+
+```typescript
+const [invoiceId] = getInvoiceIdPDA(
+  tokenMint,
+  currencyMint,
+  amount,
+  memo,
+  startTime,
+  endTime,
+);
+const accountInfo = await connection.getAccountInfo(invoiceId);
+if (accountInfo !== null) {
+  // This invoice was already paid — generate a new memo
+}
+```
+
+- **Debugging** — if a payment transaction fails or verification returns `false`, derive the Invoice ID and inspect it on a Solana explorer to see whether the account exists.
 
 ## Full Transaction Flow — Server to Client
 
@@ -315,10 +395,20 @@ Use `validateInvoicePayment` to confirm that a specific invoice was paid on-chai
 
 ### How It Works
 
-1. Derives the Invoice ID PDA from `(mint, currencyMint, amount, memo, startTime, endTime)`.
-2. Queries the Pump HTTP API to check if the payment event exists.
-3. If the HTTP API is unavailable and a `Connection` was provided, falls back to scanning on-chain transaction logs via RPC.
-4. Returns `true` if a matching payment event is found, `false` otherwise.
+1. **Derives the Invoice ID PDA** from the six parameters `(mint, currencyMint, amount, memo, startTime, endTime)` using `getInvoiceIdPDA` internally. The resulting `PublicKey` uniquely identifies the invoice on-chain.
+2. **Queries the Pump HTTP API** — sends a GET request with `invoice-id` (base58) and `mint` as query parameters. If the endpoint returns a response, it validates **every field** individually:
+   - `data.user` === `user` (base58)
+   - `data.tokenized_agent_mint` === `mint` (base58)
+   - `data.currency_mint` === `currencyMint` (base58)
+   - `data.amount` === `amount` (BN equality)
+   - `data.memo` === `memo` (BN equality)
+   - `data.start_time` === `startTime` (BN equality)
+   - `data.end_time` === `endTime` (BN equality)
+
+   All seven checks must pass for the method to return `true`.
+
+3. **RPC fallback** — if the HTTP API is unavailable (network error or non-200 status) **and** a `Connection` was provided to the `PumpAgent` constructor, it falls back to scanning on-chain transaction logs. It fetches all signatures for the Invoice ID address, parses each transaction's logs for the `agentAcceptPaymentEvent` event, and performs the same field-by-field validation. Without a `Connection`, there is no fallback and the method returns `false`.
+4. Returns `true` if a matching payment event is found by either path, `false` otherwise.
 
 ### Parameters
 
@@ -396,24 +486,15 @@ async function verifyPayment(params: {
 ## End-to-End Flow
 
 ```
-1. Agent decides on price → generates unique memo → sets time window
-       ↓
-2. Server: buildAcceptPaymentInstructions(...) → returns TransactionInstruction[]
-       ↓
+1. Agent decides on price → generates unique memo(number) → sets time window
+2. Server: buildAcceptPaymentInstructions({...}) → returns TransactionInstruction[]
 3. Server: builds full Transaction (blockhash + feePayer + instructions) → serializes as base64
-       ↓
 4. Client: deserializes base64 → Transaction.from(Buffer.from(txBase64, "base64"))
-       ↓
 5. Client: signTransaction(tx) — wallet prompts user to approve
-       ↓
 6. Client: connection.sendRawTransaction(signedTx.serialize()) → connection.confirmTransaction(signature)
-       ↓
-7. Server: validateInvoicePayment(...) → returns true/false (ALWAYS verify server-side)
-       ↓
+7. Server: with the exactly same parameters used for buildAcceptPaymentInstructions server  validateInvoicePayment({...}) → returns true/false (ALWAYS verify server-side)
 8. Agent delivers the service (or asks user to retry)
 ```
-
----
 
 ## Scenario Tests & Troubleshooting
 
