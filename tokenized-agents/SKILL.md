@@ -12,6 +12,7 @@ metadata:
 **MANDATORY — Do NOT write or modify any code until every item below is answered by the user:**
 
 - [ ] Agent token mint address (from pump.fun)
+- [ ] Payment authority wallet address — the user must provide a wallet **they already control** (i.e. they can sign transactions with it today). This wallet will be the `agentAuthority` for withdrawals and configuration. **Do NOT generate a new keypair for this — see Safety Rules.**
 - [ ] Payment currency decided (USDC or SOL)
 - [ ] Price/amount confirmed (in smallest unit)
 - [ ] RPC URL provided or a fallback agreed upon
@@ -23,6 +24,9 @@ You MUST ask the user for ALL unchecked items in your very first response. Do no
 
 - **NEVER** log, print, or return private keys or secret key material.
 - **NEVER** sign transactions on behalf of a user — you build the instruction, the user signs.
+- **NEVER generate a new keypair to use as `agentAuthority`.** The authority wallet controls all agent revenue — withdrawals, buyback rate changes, and authority transfers. If you use a generated keypair and the private key is lost, all funds are **permanently locked** with no recovery path. Always use a wallet the developer already controls and can sign with.
+- **NEVER call `agentInitialize` or the SDK's `create()` method** unless the developer has explicitly confirmed they control the `agentAuthority` wallet by signing a test transaction or message with it. This skill covers payment acceptance and verification only — agent initialization is a separate, irreversible operation.
+- **This skill does NOT cover agent initialization.** The `agentInitialize` instruction sets the `agentAuthority` irrevocably. If you are asked to initialize an agent, stop and warn the developer: (1) the authority address must be a wallet they already control, (2) initialization cannot be undone, and (3) an incorrect authority means permanent loss of all future revenue.
 - Always validate that `amount > 0` before creating an invoice.
 - Always ensure `endTime > startTime` and both are valid Unix timestamps.
 - Use the correct decimal precision for the currency (6 decimals for USDC, 9 for SOL).
@@ -58,6 +62,12 @@ AGENT_TOKEN_MINT_ADDRESS=<your-agent-mint-address>
 # USDC: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 # SOL (wrapped): So11111111111111111111111111111111111111112
 CURRENCY_MINT=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+
+# Payment authority wallet — the public key of the wallet that controls agent revenue.
+# WARNING: This MUST be a wallet you already own and can sign with.
+# NEVER use a generated keypair here. If you lose access to this wallet,
+# all agent revenue is permanently locked with no recovery path.
+PAYMENT_AUTHORITY_WALLET=<your-authority-wallet-public-key>
 ```
 
 **RPC for mainnet-beta:** The default Solana public RPC (`https://api.mainnet-beta.solana.com`) does **not** support sending transactions. You MUST ask the user which RPC endpoint to use. Present these free mainnet-beta options if the user does not have their own:
@@ -181,7 +191,7 @@ You do not need to handle SOL wrapping or compute budget yourself — `buildAcce
 
 - The `amount`, `memo`, `startTime`, and `endTime` must exactly match when verifying later.
 - Each unique combination of `(mint, currencyMint, amount, memo, startTime, endTime)` can only be paid once — the on-chain Invoice ID PDA prevents duplicate payments.
-- Generate a unique `memo` for each invoice (e.g. `Math.floor(Math.random() * 900000000000) + 100000`).
+- Generate a unique `memo` for each invoice (e.g. `crypto.randomInt(100000, 900000100000)`).
 
 ## Deriving the Invoice ID
 
@@ -265,8 +275,10 @@ This is the complete flow for building a transaction on the server, signing it o
 ### Step 1: Generate Invoice Parameters (Server)
 
 ```typescript
+import crypto from "node:crypto";
+
 function generateInvoiceParams() {
-  const memo = Math.floor(Math.random() * 900000000000) + 100000;
+  const memo = crypto.randomInt(100000, 900000100000);
   const now = Math.floor(Date.now() / 1000);
   const startTime = now;
   const endTime = now + 86400; // valid for 24 hours
@@ -479,6 +491,8 @@ async function verifyPayment(params: {
 ```
 
 ## End-to-End Flow
+
+> **Prerequisite:** Before building any payment flow, the agent must already be initialized on-chain with an `agentAuthority` wallet that the developer controls. This skill covers steps 1–8 below (payment acceptance and verification). Agent initialization is a separate, irreversible operation — see the Safety Rules above.
 
 ```
 1. Agent decides on price → generates unique memo(number) → sets time window
