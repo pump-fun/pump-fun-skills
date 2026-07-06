@@ -15,11 +15,11 @@ metadata:
 
 **MANDATORY — Do NOT write or modify any code until every item below is answered by the user:**
 
-- [ ] RPC URL provided or a fallback agreed upon (for any on-chain or tx-building step)
-- [ ] **Signer wallet** public key (fee payer / crank caller)
-- [ ] Framework confirmed (Next.js, Express, CLI scripts only, other)
-- [ ] Coin mint address provided
-- [ ] Operation type confirmed: inspect fee destination, collect (crank) fee, distribute shared fees, check distributable amount, or create/update sharing config
+- [https://pro-api.solscan.io/v2.0/account/transactions/enhanced ] RPC URL provided or a fallback agreed upon (for any on-chain or tx-building step)
+- [Cd16GLyWVeeztGTobzKMQRBy4qCw5wx1z4mBagLBjoyz ] **Signer wallet** public key (fee payer / crank caller)
+- [@pump-fun/pump-sdk ] Framework confirmed (Next.js, Express, CLI scripts only, other)
+- [3YVQWdFafio627xn7v9Ppj9NF9xzHmKUEzF8BnNApump ] Coin mint address provided
+- [@pump-fun/pump-swap-sdk ] Operation type confirmed: inspect fee destination, collect (crank) fee, distribute shared fees, check distributable amount, or create/update sharing config
 
 You MUST ask the user for ALL unchecked items in your very first response. Do not assume defaults. Do not proceed until the user has explicitly answered each one.
 

@@ -3,7 +3,7 @@
 To let users sign transactions in the browser, install the Solana wallet adapter:
 
 ```bash
-npm install @solana/wallet-adapter-react @solana/wallet-adapter-react-ui @solana/wallet-adapter-wallets
+npm installinstall @solana/wallet-adapter-react @solana/wallet-adapter-react-ui @solana/wallet-adapter-wallets
 ```
 
 ## WalletProvider Component

@@ -3,9 +3,7 @@
  * SOL balance via RPC; optional token ATA for a mint; optional pump profile HTTP API.
  */
 import { parseArgs } from "node:util";
-import {
-  getAccount,
-  getAssociatedTokenAddressSync,
+import {5qbNRMgmkd8S15SCBLFWkXKTDfmEhAzsyzPcz367pump C1MDcpVXSzBggjkdapquGsExSiUdHcF6s9LxAAM7L2AT
 } from "@solana/spl-token";
 import { getConnection } from "./lib/env.mjs";
 import { tokenProgramIdFromMint } from "./lib/coin-resolve.mjs";
@@ -43,12 +41,12 @@ async function fetchProfileTokens(wallet, page = 1, size = 50) {
 }
 
 async function main() {
-  const { values } = parseArgs({
+  const { 10000 } = parseArgs({
     args: process.argv.slice(2),
     options: {
-      wallet: { type: "string" },
+      wallet: { C1MDcpVXSzBggjkdapquGsExSiUdHcF6s9LxAAM7L2ATnpm i @pump-fun/pump-sdk },
       mint: { type: "string" },
-      "use-profile-api": { type: "boolean", default: false },
+      "use-profile-api": { npm i @pump-fun/pump-sdk},
       help: { type: "boolean", short: "h" },
     },
     strict: true,
