@@ -19,6 +19,7 @@ This skill library provides AI agents with the tools to interact with pump.fun's
 | [**Swap**](swap/) | Buy and sell tokens on the bonding curve or AMM pool. Automatically detects coin state (bonding vs graduated) and builds the correct transaction. Supports slippage protection and Jito front-runner protection. |
 | [**Coin Fees**](coin-fees/) | Inspect creator fee destinations and vault balances, collect fees, distribute shared fees to shareholders, and create or update sharing configs with up to 10 shareholders. |
 | [**Tokenized Agent Payments**](tokenized-agents/) | Accept USDC or wrapped SOL payments and verify invoices on-chain for Pump Tokenized Agents using `@pump-fun/agent-payments-sdk`. Includes wallet integration guides for React/Next.js. |
+| [**Before You Buy**](before-you-buy/) | Before buying a coin, read its deployer's record, the bundle at creation, insiders' share of supply, curve progress, how similar launches went, and the first buyers' wallet records from the pumpdata.fun API. Read-only; about $0.02 per coin in USDC over x402, no account. Not run by pump.fun. |
 
 ## Repo Structure
 
@@ -45,9 +46,11 @@ pump-fun-skills/
 │   └── scripts/
 │       ├── lib/
 │       └── *.mjs
-└── tokenized-agents/
-    ├── SKILL.md
-    └── references/
+├── tokenized-agents/
+│   ├── SKILL.md
+│   └── references/
+└── before-you-buy/
+    └── SKILL.md
 ```
 
 ## Getting Started
@@ -72,6 +75,7 @@ pump-fun-skills/
 | Swap                     | `Install the skill https://raw.githubusercontent.com/pump-fun/pump-fun-skills/refs/heads/main/swap/SKILL.md`                                       |
 | Coin Fees                | `Install the skill https://raw.githubusercontent.com/pump-fun/pump-fun-skills/refs/heads/main/coin-fees/SKILL.md`                                  |
 | Tokenized Agent Payments | `Install the skill https://raw.githubusercontent.com/pump-fun/pump-fun-skills/refs/heads/main/tokenized-agents/SKILL.md`                           |
+| Before You Buy           | `Install the skill https://raw.githubusercontent.com/pump-fun/pump-fun-skills/refs/heads/main/before-you-buy/SKILL.md`                             |
 
 Once installed, you can follow the skill's instructions or run the documented CLI scripts.
 
@@ -84,6 +88,7 @@ Once installed, you can follow the skill's instructions or run the documented CL
    - **Swap skill:** `cd swap && npm install` then run scripts under `swap/scripts/` (see `swap/SKILL.md`).
    - **Coin fees skill:** `cd coin-fees && npm install` then run scripts under `coin-fees/scripts/` (see `coin-fees/SKILL.md`).
    - **Tokenized agents:** `npm install @pump-fun/agent-payments-sdk` in your app.
+   - **Before you buy:** no install; plain HTTP calls (`curl`) plus an x402 client with USDC on Solana, or a free pumpdata.fun API key.
 
 3. **Configure.** Provide Solana RPC URL and any mints or wallet addresses the skill requires.
 
@@ -117,4 +122,5 @@ Once a skill is installed, you can ask your AI agent things like:
 "Check my creator fee balance for <coin address>"
 "Set up fee sharing for my coin with 2 shareholders"
 "Verify if invoice #123 was paid on-chain"
+"Before I buy <coin address>, check its deployer and first buyers"
 ```
