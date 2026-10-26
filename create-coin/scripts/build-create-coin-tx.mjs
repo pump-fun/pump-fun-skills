@@ -5,8 +5,7 @@
  * Build create + initial buy transaction; write mint keypair to disk; partial-sign with mint.
  * User wallet must co-sign and send (never pass user secret key to this script).
  */
-import { writeFileSync, mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import BN from "bn.js";
 import { Keypair, PublicKey } from "@solana/web3.js";
@@ -30,6 +29,7 @@ import {
   ALT_ADDRESS_DEVNET,
 } from "./lib/constants.mjs";
 import { buildAndPartialSignTx, transactionToBase64 } from "./lib/tx-build.mjs";
+import { writeMintKeypairFile } from "./lib/mint-keypair-file.mjs";
 
 const AGENT_INITIALIZE_DEFAULT_UNITS = 30_000;
 const DEFAULT_BUYBACK_BPS = 5000;
@@ -196,12 +196,7 @@ async function main() {
     tipSol,
   });
 
-  mkdirSync(dirname(resolvedOut), { recursive: true });
-  writeFileSync(
-    resolvedOut,
-    `${JSON.stringify(Array.from(mintKeypair.secretKey))}\n`,
-    { mode: 0o600 },
-  );
+  writeMintKeypairFile(resolvedOut, mintKeypair.secretKey);
 
   printJson({
     transaction: transactionToBase64(tx),
