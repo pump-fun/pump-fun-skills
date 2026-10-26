@@ -8,6 +8,7 @@
     "node": ">=18"
   },
   "scripts": {
+    "test": "node --test test/*.test.mjs",
     "fetch-coin": "node scripts/fetch-coin.mjs",
     "build-create-coin-tx": "node scripts/build-create-coin-tx.mjs"
   },
