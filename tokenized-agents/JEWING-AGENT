@@ -1,0 +1,136 @@
+# JEWING AGENT
+
+## Overview
+
+JEWING AGENT is a tokenized AI agent focused on market awareness, community engagement, and ecosystem intelligence. The agent continuously monitors on-chain activity, social sentiment, and ecosystem developments to provide actionable insights while maintaining transparency and decentralization.
+
+---
+
+## Identity
+
+- **Name:** JEWING AGENT
+- **Ticker:** JWING
+- **Version:** v0.1.0
+- **Status:** Beta
+- **Network:** Solana
+
+---
+
+## Mission
+
+Create an AI-powered ecosystem participant capable of:
+
+- Monitoring token trends
+- Summarizing ecosystem news
+- Tracking wallet activity
+- Identifying emerging narratives
+- Providing educational market commentary
+
+---
+
+## Core Features
+
+### 📊 Market Intelligence
+
+- Monitor trending Solana tokens
+- Track liquidity movements
+- Detect volume spikes
+- Watch whale wallets
+- Generate market summaries
+
+### 🧠 AI Analysis
+
+- Sentiment analysis
+- Narrative detection
+- Community engagement scoring
+- Risk flagging
+- Opportunity identification
+
+### 🤖 Automation
+
+- Scheduled reports
+- Community updates
+- Event notifications
+- Watchlist management
+
+---
+
+## Roadmap
+
+### Phase 1
+
+- [x] Repository setup
+- [x] Agent specification
+- [ ] Initial deployment
+- [ ] Community testing
+
+### Phase 2
+
+- [ ] Wallet integrations
+- [ ] Live analytics
+- [ ] Social monitoring
+- [ ] Telegram integration
+
+### Phase 3
+
+- [ ] Autonomous actions
+- [ ] DAO governance
+- [ ] Plugin ecosystem
+- [ ] API access
+
+---
+
+## Token Information
+
+| Field | Value |
+|--------|-------|
+| Name | JEWING AGENT |
+| Symbol | JWING |
+| Supply | TBD |
+| Decimals | 9 |
+| Mint Authority | Renounced (planned) |
+
+---
+
+## Contract Address (CA)
+
+```
+CA: TO_BE_ANNOUNCED
+```
+
+> Placeholder only. The official contract address will be published after deployment.
+
+---
+
+## Security
+
+- Open-source
+- Community audited (planned)
+- No hidden mint functions
+- Transparent roadmap
+
+---
+
+## Repository Structure
+
+```
+/
+├── docs/
+├── src/
+├── scripts/
+├── config/
+├── README.md
+└── LICENSE
+```
+
+---
+
+## Disclaimer
+
+This project is experimental software intended for research and community participation. Nothing contained within this repository constitutes financial advice.
+
+---
+
+## License
+
+MIT License
